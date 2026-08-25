@@ -195,7 +195,8 @@ body #tokenbar-window:first-child{
 #tokenbar.vertical #token-action-bar .token-list .token {
     flex-wrap: nowrap;
     flex-direction: row-reverse;
-    width: calc(var(--tokenbar-token-size) + 70px);
+    /* ⚠️ FORK PATCH (queue T170b): the stats panel's 70px is now the stat-width slider. */
+    width: calc(var(--tokenbar-token-size) + var(--tokenbar-stat-width, 70px));
 }
 
 #tokenbar .token-list .token.only-actor {
@@ -1855,4 +1856,39 @@ body.system-dnd5e .monks-tokenbar.chat-card .dice-roll.expanded .dice-tooltip-co
 
 #tokenbar.vertical.collapsed .tokenbar-header-button:before {
     content: "";
+}
+/* ⚠️ FORK PATCH (queue T170c): compact stats — active while the stat-width slider sits at
+   the narrow end (≤36px, toggled as .compact-stats by setStatWidth/_onRender). Each stat
+   collapses to a slightly bigger icon with its number printed directly ON the glyph; the
+   glyph dims and the number gets a hard dark outline so it stays readable on any icon. */
+#tokenbar.compact-stats .token .token-stat {
+    flex: 0 0 24px;
+    padding: 0;
+}
+#tokenbar.compact-stats .token .token-stat i {
+    flex: 0 0 100%;
+    font-size: 20px;
+    line-height: 24px;
+    padding-top: 0;
+    color: rgba(255, 255, 255, 0.55);
+}
+#tokenbar.compact-stats .token .token-stat span {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000, 1px 1px 2px #000, 0 0 4px #000;
+}
+
+/* ⚠️ FORK PATCH (queue T170c): in compact mode the vertical bar's hardcoded min-widths
+   (105px bar / 132px controls) would defeat the whole point — let content set the width. */
+#tokenbar.compact-stats.vertical {
+    min-width: unset;
+}
+#tokenbar.compact-stats.vertical #tokenbar-controls {
+    min-width: unset;
 }

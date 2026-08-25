@@ -184,7 +184,14 @@ export class TokenBar extends HandlebarsApplicationMixin(ApplicationV2) {
                     return null;
                 if (button.enabled && !button.enabled())
                     btn.disabled = true;
+                // ⚠️ FORK PATCH (queue T170a): duplicate() strips functions — re-evaluate
+                // function-valued title/icon (the merged movement toggle uses them), and light
+                // the toggle while global movement is locked.
+                if (typeof button.title === 'function') btn.title = button.title();
+                if (typeof button.icon === 'function') btn.icon = button.icon();
                 if (btn.id == `movement-${movement}`)
+                    btn.active = true;
+                if (btn.id == 'movement-toggle' && movement == 'none')
                     btn.active = true;
                 return btn;
             });
@@ -211,6 +218,9 @@ export class TokenBar extends HandlebarsApplicationMixin(ApplicationV2) {
 
         $(".token", this.element).dblclick(this._onDblClickToken.bind(this));//.hover(this._onHoverToken.bind(this));
         $(this.element).toggleClass("vertical", setting('show-vertical') == "true");
+        // ⚠️ FORK PATCH (queue T170c): the element is rebuilt on every render — re-apply the
+        // compact-stats class so the narrow-width overlay mode survives re-renders.
+        $(this.element).toggleClass("compact-stats", setting('stat-width') <= 36);
 
         new foundry.applications.ux.DragDrop.implementation({
             dragSelector: ".token",

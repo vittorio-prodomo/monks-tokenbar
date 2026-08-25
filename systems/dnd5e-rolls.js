@@ -172,6 +172,17 @@ export class DnD5eRolls extends BaseRolls {
         let dialogConfig = { configure: !fastForward };
         const speaker = ChatMessage.getSpeaker({ actor });
         let messageConfig = { create: false, data: { speaker } }
+        // ⚠️ FORK PATCH (queue T145): stamp the request's DC into the roll config so
+        // outcome-aware automations can tell a settled success from an unknown outcome —
+        // dnd5e copies a process-level `target` into every roll's `options.target`
+        // (dnd5e.mjs `config.options.target ??= process.target`), which is what CPR's
+        // Tactical Mind bonus/consume gates read. MTB otherwise keeps its DC only in
+        // message flags. T86 rule: stamp ONLY when the roller can compute the outcome
+        // themselves (DC shown, or a GM client) — else the missing offer leaks the result.
+        const dc = message?.getFlag?.("monks-tokenbar", "dc");
+        const showdc = message?.getFlag?.("monks-tokenbar", "showdc");
+        if ($.isNumeric(dc) && (showdc || game.user.isGM) && ["ability", "save", "skill", "tool"].includes(request.type))
+            config.target = Number(dc);
         if (request.type == 'ability') {
             rollfn = actor.rollAbilityCheck;
             config.ability = request.key;

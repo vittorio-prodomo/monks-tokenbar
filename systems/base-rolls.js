@@ -94,26 +94,19 @@ export class BaseRolls {
         var buttons = [];
         if (setting("show-movement") && game.user.isGM) {
             buttons.push([
+                // ⚠️ FORK PATCH (queue T170a): the Free Movement / No Movement pair merged into
+                // ONE toggle so the button grid drops to 2×2. The button lights up while global
+                // movement is locked ('none'); clicking flips free↔none (from 'combat' it locks).
+                // Function-valued title/icon are evaluated in _prepareButtonContext.
                 {
-                    id: 'movement-free',
-                    title: 'MonksTokenBar.FreeMovement',
-                    icon: 'fa-running',
-                    condition: () => game.user.isGM && setting("show-movement"),
-                    click: (game.user.isGM ?
-                        (event) => {
-                            event.preventDefault();
-                            MonksTokenBar.changeGlobalMovement('free');
-                        } : null)
-                },
-                {
-                    id: 'movement-none',
-                    title: 'MonksTokenBar.NoMovement',
+                    id: 'movement-toggle',
+                    title: () => setting("movement") == 'none' ? 'MonksTokenBar.FreeMovement' : 'MonksTokenBar.NoMovement',
                     icon: 'fa-street-view',
                     condition: () => game.user.isGM && setting("show-movement"),
                     click: (game.user.isGM ?
                         (event) => {
                             event.preventDefault();
-                            MonksTokenBar.changeGlobalMovement('none');
+                            MonksTokenBar.changeGlobalMovement(setting("movement") == 'none' ? 'free' : 'none');
                         } : null)
                 },
                 {

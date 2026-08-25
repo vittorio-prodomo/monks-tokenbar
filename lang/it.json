@@ -147,6 +147,8 @@
   "MonksTokenBar.capture-savingthrows.hint": "Crea una carta chat per il tiro salvezza quando richiesto da un oggetto",
   "MonksTokenBar.token-size.name": "Dimensione dei Token",
   "MonksTokenBar.token-size.hint": "Cambia la dimensione dei token sulla Tokenbar, nel caso gli attributi scompaiano dai lati.",
+  "MonksTokenBar.stat-width.name": "Larghezza del resto",
+  "MonksTokenBar.stat-width.hint": "Larghezza del pannello statistiche accanto all'immagine del token. Al minimo i numeri vengono stampati direttamente su icone leggermente più grandi.",
   "MonksTokenBar.open-loot.name": "Apri Entità Bottino",
   "MonksTokenBar.open-loot.hint": "Apri l'entità bottino dopo la sua creazione o trasferimento oggetti",
   "MonksTokenBar.gm-sound.name": "Suono Tiro GM",

@@ -208,6 +208,25 @@ export const registerSettings = function () {
 		onChange: (val) => { MonksTokenBar.setTokenSize(val); }
 	});
 
+	// ⚠️ FORK PATCH (queue T170b/c): width of everything BESIDE the token image — the stats
+	// panel (AC shield / perception eye rows). At the minimum end the bar drops into compact
+	// mode: the numbers render directly ON slightly bigger icons. Token size stays its own
+	// slider; these two are the ONLY width controls.
+	game.settings.register(modulename, "stat-width", {
+		name: game.i18n.localize("MonksTokenBar.stat-width.name"),
+		hint: game.i18n.localize("MonksTokenBar.stat-width.hint"),
+		scope: "client",
+		config: true,
+		range: {
+			min: 26,
+			max: 90,
+			step: 2,
+		},
+		default: 70,
+		type: Number,
+		onChange: (val) => { MonksTokenBar.setStatWidth(val); }
+	});
+
 	game.settings.register(modulename, "resolution-size", {
 		name: game.i18n.localize("MonksTokenBar.resolution-size.name"),
 		hint: game.i18n.localize("MonksTokenBar.resolution-size.hint"),

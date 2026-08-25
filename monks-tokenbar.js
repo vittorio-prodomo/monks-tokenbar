@@ -466,6 +466,16 @@ export class MonksTokenBar {
         r.style.setProperty('--tokenbar-token-size', size + "px");
     }
 
+    // ⚠️ FORK PATCH (queue T170b/c): stats-panel width as a CSS var (the vertical bar's total
+    // width is token-size + this), plus the compact-mode class at the narrow end — numbers
+    // printed on bigger icons. 36px is the flip point: below it a text row can't fit anyway.
+    static setStatWidth(width) {
+        width = width || setting("stat-width");
+        var r = document.querySelector(':root');
+        r.style.setProperty('--tokenbar-stat-width', width + "px");
+        $(MonksTokenBar.tokenbar?.element).toggleClass("compact-stats", width <= 36);
+    }
+
     static revealDice() {
         return game.dice3d ? game.settings.get("dice-so-nice", "immediatelyDisplayChatMessages") || !game.dice3d.isEnabled() : true;
     }
@@ -478,6 +488,7 @@ export class MonksTokenBar {
         tinyMCE?.PluginManager.add('dcconfig', dcconfiginit);
 
         MonksTokenBar.setTokenSize();
+        MonksTokenBar.setStatWidth();
 
         if ((game.user.isGM || setting("allow-player")) && !setting("disable-tokenbar")) {
             let { top, left } = game.user.getFlag("monks-tokenbar", "position") || {};

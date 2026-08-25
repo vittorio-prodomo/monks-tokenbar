@@ -141,6 +141,8 @@
 	"MonksTokenBar.capture-savingthrows.hint": "Create Saving Throw Chat Card when requesting item saving throw roll",
 	"MonksTokenBar.token-size.name": "Size of tokens",
 	"MonksTokenBar.token-size.hint": "Change the size of the tokens on Tokenbar, in case the attributes disappear off the side.",
+	"MonksTokenBar.stat-width.name": "Width of everything else",
+	"MonksTokenBar.stat-width.hint": "Width of the stats panel beside each token image. At the minimum the numbers are printed directly on slightly bigger icons.",
 	"MonksTokenBar.open-loot.name": "Open Loot Entity",
 	"MonksTokenBar.open-loot.hint": "Open the loot entity after the entity has been created or items transfered",
 	"MonksTokenBar.gm-sound.name": "GM Roll Sound",
