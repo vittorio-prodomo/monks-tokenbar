@@ -1892,3 +1892,10 @@ body.system-dnd5e .monks-tokenbar.chat-card .dice-roll.expanded .dice-tooltip-co
 #tokenbar.compact-stats.vertical #tokenbar-controls {
     min-width: unset;
 }
+
+/* T183: labelled modifier rows under a request-card roll. Core's dice tooltip drops
+   flat terms entirely, so these are ours to draw. */
+.mtb-modifier-parts { display: flex; flex-direction: column; gap: 1px; padding: 2px 6px 4px; }
+.mtb-modifier-part { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85em; opacity: 0.9; }
+.mtb-modifier-label { text-align: left; }
+.mtb-modifier-value { font-variant-numeric: tabular-nums; font-weight: bold; }

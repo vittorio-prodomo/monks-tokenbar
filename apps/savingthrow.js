@@ -1,6 +1,30 @@
 import { MonksTokenBar, log, i18n, setting } from "../monks-tokenbar.js";
+import { flavoredModifierParts } from '../scripts/rollParts.mjs';
 import { ApplicationSheetConfig } from "./sheet-configure.js";
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api
+
+
+/**
+ * ⚠️ FORK PATCH (queue T183, Vittorio 2026-08-27): core's `getTooltip()` renders ONLY the
+ * dice, so this card showed the die plus a single derived modifier — merging the ability
+ * modifier with whatever a feature contributed. A Tactical Mind check read "+13" with no
+ * sign that 10 of it came from the feature, even though the term carried the flavor.
+ * Append the flat terms as their own labelled rows.
+ * @param {string} tooltip   the HTML core produced
+ * @param {object} rollData  the roll in JSON form
+ * @returns {string}
+ */
+export function appendModifierRows(tooltip, rollData) {
+    let parts = flavoredModifierParts(rollData);
+    if (!parts.length) return tooltip;
+    let rows = parts.map(part => {
+        let label = part.label ?? i18n("MonksTokenBar.Modifier");
+        let sign = part.value < 0 ? '-' : '+';
+        return `<div class="mtb-modifier-part"><span class="mtb-modifier-label">${label}</span>` +
+               `<span class="mtb-modifier-value">${sign}${Math.abs(part.value)}</span></div>`;
+    }).join('');
+    return tooltip + `<div class="mtb-modifier-parts">${rows}</div>`;
+}
 
 export class SavingThrowApp extends HandlebarsApplicationMixin(ApplicationV2) {
     constructor(entries, options = {}) {
@@ -890,7 +914,7 @@ export class SavingThrow {
                         msgtoken.total = roll.total;
                         msgtoken.reveal = update.reveal || reveal;
                         msgtoken.request = update.request;
-                        tooltip = await roll.getTooltip();
+                        tooltip = appendModifierRows(await roll.getTooltip(), msgtoken.roll);
 
                         Hooks.callAll('tokenBarUpdateRoll', this, message, update.id, msgtoken.roll);
                     }
@@ -1239,7 +1263,7 @@ export class SavingThrow {
         $(`.item[data-item-id="${tokenid}"] .reroll`, content).html(`<i class="fas fa-${msgToken.rerollIcon}"></i>`);
         $(`.item[data-item-id="${tokenid}"] .dice-roll .dice-total .total`, content).html(msgToken.total);
 
-        let tooltip = await roll.getTooltip();
+        let tooltip = appendModifierRows(await roll.getTooltip(), roll.toJSON());
         let tooltipElem = $(tooltip);
         if (tooltipElem.hasClass("dice-tooltip-collapser")) {
             tooltipElem = $(".dice-tooltip", tooltipElem);
