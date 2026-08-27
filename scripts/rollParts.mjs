@@ -34,3 +34,29 @@ export function flavoredModifierParts(rollData) {
 
     return plain ? [...labelled, { label: null, value: plain }] : labelled;
 }
+
+/**
+ * Render labelled modifier rows as HTML.
+ *
+ * ⚠️ SECURITY: a roll's flavor is attacker-controllable — a player can type
+ * `/r 1d20 + 5[<img src=x onerror=...>]` or rename an item — and the result is written
+ * into a STORED chat card that re-renders on every connected client, the GM's included.
+ * The label MUST be escaped; core's own tooltip gets this for free by going through
+ * Handlebars, which this hand-built markup does not. `escape` is injected so the rule is
+ * testable without a DOM.
+ *
+ * @param {Array<{label: string|null, value: number}>} parts
+ * @param {{fallbackLabel: string, escape: (value: unknown) => string}} options
+ * @returns {string}
+ */
+export function modifierRowsHtml(parts, { fallbackLabel, escape }) {
+    if (!parts?.length) return "";
+    const rows = parts.map(part => {
+        const label = escape(part.label ?? fallbackLabel);
+        const value = Number(part.value) || 0;
+        const sign = value < 0 ? "-" : "+";
+        return `<div class="mtb-modifier-part"><span class="mtb-modifier-label">${label}</span>`
+             + `<span class="mtb-modifier-value">${sign}${Math.abs(value)}</span></div>`;
+    }).join("");
+    return `<div class="mtb-modifier-parts">${rows}</div>`;
+}

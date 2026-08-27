@@ -1,5 +1,5 @@
 import { MonksTokenBar, log, i18n, setting } from "../monks-tokenbar.js";
-import { flavoredModifierParts } from '../scripts/rollParts.mjs';
+import { flavoredModifierParts, modifierRowsHtml } from '../scripts/rollParts.mjs';
 import { ApplicationSheetConfig } from "./sheet-configure.js";
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api
 
@@ -17,14 +17,13 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api
 export function appendModifierRows(tooltip, rollData) {
     let parts = flavoredModifierParts(rollData);
     if (!parts.length) return tooltip;
-    let rows = parts.map(part => {
-        let label = part.label ?? i18n("MonksTokenBar.Modifier");
-        let sign = part.value < 0 ? '-' : '+';
-        return `<div class="mtb-modifier-part"><span class="mtb-modifier-label">${label}</span>` +
-               `<span class="mtb-modifier-value">${sign}${Math.abs(part.value)}</span></div>`;
-    }).join('');
-    return tooltip + `<div class="mtb-modifier-parts">${rows}</div>`;
+    // ⚠️ The flavor is player-controllable and this lands in a stored chat card — escape it.
+    return tooltip + modifierRowsHtml(parts, {
+        fallbackLabel: i18n("MonksTokenBar.Modifier"),
+        escape: foundry.utils.escapeHTML
+    });
 }
+
 
 export class SavingThrowApp extends HandlebarsApplicationMixin(ApplicationV2) {
     constructor(entries, options = {}) {
