@@ -1,6 +1,7 @@
 import { MonksTokenBar, log, error, debug, i18n, setting, MTB_MOVEMENT_TYPE } from "../monks-tokenbar.js";
 import { SavingThrowApp } from "./savingthrow.js";
 import { EditStats } from "./editstats.js";
+import { sameResourceBar } from "../scripts/resourceBar.mjs";
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api
 
 export class TokenBar extends HandlebarsApplicationMixin(ApplicationV2) {
@@ -515,7 +516,8 @@ export class TokenBar extends HandlebarsApplicationMixin(ApplicationV2) {
         let resource = {};
         if (token.displayBars > 0) {
             let attr = token.getBarAttribute(bar);
-            if (attr.attribute == "attributes.hp")
+            // FORK: a token with no attribute on this bar answers null.
+            if (attr?.attribute == "attributes.hp")
                 attr = foundry.utils.mergeObject(attr, (foundry.utils.getProperty(token, "actor.system.attributes.hp") || {}));
 
             if (attr != undefined && attr.type == "bar") {
@@ -562,12 +564,18 @@ export class TokenBar extends HandlebarsApplicationMixin(ApplicationV2) {
     async updateEntry(entry, refresh = true) {
         let diff = {};
 
+        // FORK: recompute both bars every time and compare everything the template draws — see
+        // scripts/resourceBar.mjs (temp HP going to 0 left the blue overlay stale). Assigned
+        // directly, not through `diff`: the recursive merge below would keep the keys of a bar
+        // that is no longer one.
+        let barsChanged = false;
         if (game.settings.get("monks-tokenbar", "show-resource-bars") && entry.token) {
-            if (entry?.resource1?.value != entry.token.getBarAttribute('bar1')?.value) {
-                diff.resource1 = this.getResourceBar(entry.token, "bar1");
-            }
-            if (entry?.resource2?.value != entry.token.getBarAttribute('bar2')?.value) {
-                diff.resource2 = this.getResourceBar(entry.token, "bar2");
+            for (const [key, bar] of [["resource1", "bar1"], ["resource2", "bar2"]]) {
+                const next = this.getResourceBar(entry.token, bar);
+                if (!sameResourceBar(entry[key], next)) {
+                    entry[key] = next;
+                    barsChanged = true;
+                }
             }
         }
 
@@ -634,7 +642,7 @@ export class TokenBar extends HandlebarsApplicationMixin(ApplicationV2) {
             diff.nopanning = false;
         }
 
-        if (Object.keys(diff).length > 0) {
+        if (Object.keys(diff).length > 0 || barsChanged) {
             foundry.utils.mergeObject(entry, diff);
             if(refresh)
                 this.render();
