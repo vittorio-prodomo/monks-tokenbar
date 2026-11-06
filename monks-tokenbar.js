@@ -5,6 +5,7 @@ import { SavingThrow, SavingThrowApp } from "./apps/savingthrow.js";
 import { ContestedRoll, ContestedRollApp } from "./apps/contestedroll.js";
 import { LootablesApp } from "./apps/lootables.js";
 import { MonksTokenBarAPI } from "./monks-tokenbar-api.js";
+import { isCompanionOfCombatant } from "./scripts/companionTurn.mjs";
 import { dcconfiginit } from "./plugins/dcconfig.plugin.js"
 
 import { BaseRolls } from "./systems/base-rolls.js";
@@ -774,8 +775,12 @@ export class MonksTokenBar {
                 if (setting('free-vehicle-combat') && entry.actor?.type == "vehicle" && entry.actor?.isOwner)
                     allowNpc = true;
 
-                log('Checking movement', entry.name, token.name, entry, token.id, token, allowNpc);
-                return !(entry.tokenId == token.id || allowNpc || (setting("allow-after-movement") && curCombat.previous.tokenId == token.id));
+                // FORK PATCH (queue T257): a Primal Companion acts during its hunter's turn (2024 PHB), although it
+                // is a combatant itself (scripts/companionTurn.mjs explains why upstream's exemption misses it).
+                let allowCompanion = isCompanionOfCombatant(token.actor?.flags, entry.actor?.id, (uuid) => fromUuidSync(uuid));
+
+                log('Checking movement', entry.name, token.name, entry, token.id, token, allowNpc, allowCompanion);
+                return !(entry.tokenId == token.id || allowNpc || allowCompanion || (setting("allow-after-movement") && curCombat.previous.tokenId == token.id));
             }
 
             return true;
